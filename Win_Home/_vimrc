@@ -1,0 +1,156 @@
+" -----------------------------------------------------------------------------
+" Wesley Taylor of FPGAMASON LTD.
+" Vim & gvim setup for FPGA - heavy workflows
+" -----------------------------------------------------------------------------
+"  Preconfig
+" -----------------------------------------------------------------------------
+" Required to update vim environment varible. We don't need vi compatibility
+" There is a reason vi evolved to vim, and maybe vim -> nvim  
+set nocompatible
+" Remove the annoying beep, when user is doing keypresses that will have no
+" affect.
+set noerrorbells visualbell t_vb=
+" -----------------------------------------------------------------------------
+" Plugins setup - Managed by Vundle
+" -----------------------------------------------------------------------------
+" Vim makes cache for filetype plugins from runtimepath. 
+" So if vundle changes runtimepath, it must reset before calling.
+filetype off
+set rtp+=$HOME/.vim/bundle/Vundle.vim
+call vundle#begin('$HOME/.vim/bundle/')
+" ----------------------------
+" Beautify the powerline/command line bar
+" ----------------------------
+Plugin 'bling/vim-airline'
+Plugin 'vim-airline/vim-airline-themes'
+Plugin 'flazz/vim-colorschemes'
+Plugin 'altercation/vim-colors-solarized'
+" ----------------------------
+" Affect the way one searches the directories
+" ----------------------------
+Plugin 'scrooloose/nerdtree'
+Plugin 'kien/ctrlp.vim'
+" ----------------------------
+" Editing
+" ----------------------------
+Plugin 'easymotion/vim-easymotion'
+Plugin 'scrooloose/syntastic'
+Plugin 'sjl/gundo.vim'
+Plugin 'godlygeek/tabular'
+Plugin 'scrooloose/nerdcommenter'
+" ----------------------------
+" Version Control
+" ----------------------------
+Plugin 'tpope/vim-fugitive'
+" ----------------------------
+" TBD
+" ----------------------------
+"Plugin 'majutsushi/tagbar' "FIXME
+"Plugin 'mbbill/undotree'
+"Plugin 'suoto/vim-hdl'
+"Plugin 'xolox/vim-easytags'
+"Plugin 'vim-scripts/TagHighlight'
+call vundle#end() " required
+" Enable detection of filestype & plugins after vundles played with rtp.
+" You can see rtp by - 'set rtp'
+filetype plugin indent on
+" -----------------------------------------------------------------------------
+" Set Configuration of vim window
+" -----------------------------------------------------------------------------
+"  Applicable to Gvim only. To edit terminals, change font 
+"  natively.
+if has("gui_running")
+	set guioptions-=T "Turn off taskbar
+	if has("gui_gtk2")
+		set guifont=Inconsolata\ 12
+	elseif has("gui_macvim")
+		set guifont=Menlo\ Regular:h14
+	elseif has("gui_win32")
+		set guifont=Consolas:h12:cANSI
+	endif
+endif
+" Increase command height to give better visibility
+set cmdheight=2
+" Prevent hard wrap cutting words
+set wrap linebreak nolist
+" Display alterations
+set relativenumber
+" To enable color, user to set terminal <- your .profile
+" For bash, zsh, ksh -
+" 	if [ -e /usr/share/terminfo/x/xterm-256color ]; then
+" 	        export TERM='xterm-256color'
+" 	else
+" 	        export TERM='xterm-color'
+" 	fi
+" For cshrc
+" 	setenv TERM xterm-256color
+" To enable the colors in vim - search help termcap-options E436
+" also see settings with 'set termcap'
+set t_Co=256
+"set t_AB=^[[48;5;%dm
+"set t_AF=^[[38;5;%dm
+if !exists("g:syntax_on")
+	syntax enable
+endif
+try
+	colorscheme wombat | " From plugin
+catch
+	" Default value
+	colorscheme murphy
+endtry
+" --------------------------------------------------------
+" Set configure functionality in Window
+" --------------------------------------------------------
+" Allow search text to be highlighed
+set hlsearch
+" Allow Backspace
+set backspace=2
+" Allow tag search to recursively search up
+set tags=./tags;/ " 	TODO - Create own vhdl tags?
+" Allow currently buffer to be push elsewhere on the buffer list.
+" If you do not save and it goes tits up don't blame me
+set hidden
+" Check for plugin, if it exists then proceed
+if !exists(":AirlineTheme")
+	let g:airline_theme='base16_mocha'
+	" Not all rigs have fonts for symbols feature
+endif
+" Set vim to change direction for each file/buffer window open
+if exists('+autochdir')
+	set autochdir
+else
+	if has('autocmd')	
+		autocmd BufEnter * silent! lcd %:p:h:gs / /\\ /
+	endif
+endif
+if !exists(":SyntasticToggleMode")
+	" Does Airline deal with this?
+	"set statusline+=%#warningmsg#
+	"set statusline+=%{SyntasticStatuslineFlag()}
+	"set statusline+=%*
+	let g:syntastic_always_populate_loc_list = 1
+	let g:syntastic_auto_loc_list = 1
+	let g:syntastic_check_on_open = 0
+	let g:syntastic_check_on_wq   = 0
+	let g:syntastic_enable_signs  = 1
+	" Priority if statement
+	if !exists('xvcom')
+		let g:syntastic_vhdl_checkers = ['vcom']
+		" Additional arguments to call
+		let g:syntastic_vhdl_vcom_args = "-2008"
+	elseif !exists('ghdl')
+		let g:syntastic_vhdl_checkers = ['ghdl']
+		"let g:syntastic_vhdl_ghdl_args = xx
+	endif
+endif
+
+" -----------------------------------------------------------------------------
+" Keyboard mapping for vim session
+" -----------------------------------------------------------------------------
+nnoremap <C-L> :nohl<CR>
+source $HOME/.vim/mappings/func_keys.vim
+" source $HOME/mappings/tab_ctrl.vim
+source $HOME/.vim/mappings/tabularize_setup.vim
+source $HOME/.vim/mappings/select_abbr.vim
+" -----------------------------------------------------------------------------
+
